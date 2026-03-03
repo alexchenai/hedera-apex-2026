@@ -146,8 +146,7 @@ app.post("/api/v1/agents/register", async (req, res) => {
       agent_name,
       capabilities: capabilities || [],
       stake_amount_hbar: stake_amount_hbar || 0,
-      hcs_topic_id: topicId,
-      registration_tx: registrationTx,
+      ...(topicId ? { hcs_topic_id: topicId, registration_tx: registrationTx } : {}),
       reputation_score: 100,
       jobs_completed: 0,
       created_at: new Date().toISOString(),
@@ -247,7 +246,7 @@ app.post("/api/v1/agents/attest", async (req, res) => {
       message: hcsTx 
         ? `Attestation logged to Hedera: tx ${hcsTx}`
         : "Attestation created (HCS pending credentials)",
-      verification_url: `https://hashscan.io/testnet/topic/${agent?.hcs_topic_id}`
+      ...(agent?.hcs_topic_id ? { verification_url: `https://hashscan.io/testnet/topic/${agent.hcs_topic_id}` } : {})
     });
 
   } catch (err) {
@@ -313,9 +312,7 @@ app.post("/api/v1/actions/log", async (req, res) => {
     res.status(201).json({
       success: true,
       action: actionRecord,
-      hashscan_url: actionRecord.hcs_topic_id 
-        ? `https://hashscan.io/testnet/topic/${actionRecord.hcs_topic_id}`
-        : null
+      ...(actionRecord.hcs_topic_id ? { hashscan_url: `https://hashscan.io/testnet/topic/${actionRecord.hcs_topic_id}` } : {})
     });
 
   } catch (err) {
@@ -348,12 +345,14 @@ app.get("/api/v1/agents/:id/history", async (req, res) => {
     res.json({
       agent_id: id,
       agent_name: agent?.agent_name,
-      hcs_topic_id: agent?.hcs_topic_id,
+      ...(agent?.hcs_topic_id ? {
+        hcs_topic_id: agent.hcs_topic_id,
+        hashscan_topic_url: `https://hashscan.io/testnet/topic/${agent.hcs_topic_id}`
+      } : {
+        hcs_note: "HCS topic will be created when Hedera credentials are configured"
+      }),
       actions_count: actions.length,
-      actions,
-      hashscan_topic_url: agent?.hcs_topic_id 
-        ? `https://hashscan.io/testnet/topic/${agent.hcs_topic_id}`
-        : null
+      actions
     });
 
   } catch (err) {
