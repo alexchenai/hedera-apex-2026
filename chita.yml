@@ -1,0 +1,17 @@
+services:
+    hedera-apex:
+        name: hedera-apex
+        hosts:
+            - hedera-apex.chitacloud.dev
+        canonical_host: hedera-apex.chitacloud.dev
+        port: 3000
+        env_vars:
+            MONGODB_URI: ""
+        ttl: 120
+        memory: 512
+        cpu: 0.25
+        dockerfile: Dockerfile
+        docker_context: .
+        handler: Handle
+        public_invoke: true
+        working_directory: /app/data/hedera-apex-2026
